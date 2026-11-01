@@ -1,15 +1,31 @@
-# photo-to-cnc-svg
+# photo-to-cnc-svg: an agent skill pack for photo → CNC-ready SVG
 
-Turn a photo into carve-ready CNC art: **photo → black-and-white artwork → clean, mm-scaled SVG** with a true-to-cut preview, a machining time estimate and import notes for your CAM program.
+**A skill pack for LLM agents** (Grok Bot, Claude, ChatGPT-style and other tool-using agents). It turns a photo into carve-ready CNC art: bold black-and-white artwork, then a clean, mm-scaled SVG with a true-to-cut preview, a machining time estimate and import notes for your CAM program.
 
-It is two things in one repo:
-
-- **A tracing tool** (`scripts/cnc_vector.py`) that turns any black-and-white image (or a photo) into closed, tool-aware vector regions for V-carve, pocket, engrave or profile cutting.
-- **A set of AI-assistant skills** (`skills/`) that run the whole flow, including the image-generation step that turns a photo into artwork worth carving.
+> **For humans:** you don't run this yourself. Point your AI agent at this repo (for example *"install the skill from github.com/SnazzyGaz/photo-to-cnc-svg"*), then just send it a photo plus a line of direction, like *"the fox's head, lose the grass"*. It shows you two artwork options, you pick one, and it hands back the SVG.
 
 | Source photo | Option A: bold stencil | Option B: mid-ground engraving | Traced SVG (preview) |
 |---|---|---|---|
 | <img src="examples/red-fox/source.jpg" width="200"> | <img src="examples/red-fox/option-a.jpg" width="200"> | <img src="examples/red-fox/option-b.jpg" width="200"> | <img src="examples/red-fox/preview.png" width="200"> |
+
+## For agents: start here
+
+**Entry point:** [`skills/photo-to-cnc-svg/SKILL.md`](skills/photo-to-cnc-svg/SKILL.md). Load it, plus the two stage skills it references:
+[`skills/cnc-graphic-artwork-generator/SKILL.md`](skills/cnc-graphic-artwork-generator/SKILL.md) (photo → B/W artwork) and
+[`skills/image-to-cnc-cut-svg/SKILL.md`](skills/image-to-cnc-cut-svg/SKILL.md) (artwork → SVG).
+
+**You need:**
+- an image-generation tool that accepts a reference image
+- a shell with Python 3, this repo checked out, and `pip install -r requirements.txt`
+
+**Flow:**
+1. Take the user's photo and short direction (subject/region, what to keep or drop). If the subject is obvious, don't ask questions.
+2. Generate **option A** (simplified bold stencil, one pass) and **option B** (mid-ground engraving: an engraving pass, then a moderate firming pass using pass 1 as reference). Prompt templates are [below](#image-generation-prompt-templates).
+3. Show A and B side by side; let the user pick one or ask for a tweak.
+4. Trace the pick: `python3 scripts/cnc_vector.py art.png -o <subject>_vcarve_300mm.svg --mode vcarve --width-mm 300 --vbit-angle 60 --depth 3 --threshold 128 --smooth 0.8 --min-feature 0.5 > stats.json` (defaults unless the user gives specs; `--min-feature 0.8` for option A).
+5. Render `python3 scripts/preview.py <svg> preview.png`, look at it, and re-trace with a higher/lower `--min-feature` if it is speckled or has lost detail (1 to 3 tries).
+
+**Return to the user:** the SVG file, the preview PNG, and a short note covering size (mm), mode, path count, the time estimate range from `stats.json` (rough; CAM simulation is authoritative), whether wide areas need a clearance end mill, and the one-line import tip for their CAM program ([CAM notes](#importing-into-cam)).
 
 ## The flow
 
@@ -35,7 +51,81 @@ All examples are original: the "photos" are generated stand-ins, then run throug
 
 Why some were traced as A: the owl's and lighthouse's option B kept a lot of fine stipple and sky hatching, which is beautiful on paper but slow and fragile in wood. Very fine engravings are better carved large (450 mm+) or as option A. The fox's B has stroke-shaped hatching that traces cleanly.
 
-## Install
+## Installing the skills in your agent
+
+The `skills/` folder holds three plain-Markdown skills with YAML front matter (`name`, `description`):
+
+| Skill | Does |
+|---|---|
+| `skills/photo-to-cnc-svg/SKILL.md` | The end-to-end flow above (start here) |
+| `skills/cnc-graphic-artwork-generator/SKILL.md` | Stage 1: photo → B/W artwork, prompt rules and QC |
+| `skills/image-to-cnc-cut-svg/SKILL.md` | Stage 2: artwork → SVG, settings, preview, CAM notes |
+
+- **Grok Bot and similar agents with a skills folder:** drop the three folders into the agent's skills directory and put this repo (or at least `scripts/` and `requirements.txt`) on the machine the agent runs code on. The skills refer to `scripts/cnc_vector.py` relative to the repo root.
+- **Claude (Agent Skills / Claude Code):** copy each folder into `.claude/skills/` (project) or `~/.claude/skills/` (personal), and keep the repo checked out alongside.
+- **ChatGPT / custom GPTs and other chat assistants:** paste `skills/photo-to-cnc-svg/SKILL.md` (and the stage 1 skill) into the instructions, and attach `cnc_vector.py` + `preview.py` as files for the code tool. The image-generation steps need a model that accepts a reference image.
+
+The agent needs: an image-generation tool that takes a reference image, and somewhere to run Python.
+
+## Image-generation prompt templates
+
+Replace the `[...]` parts. Always attach the source photo as a reference image. Naming the subject's defining features is what keeps it from drifting into generic clip art.
+
+### Option A: simplified bold stencil (one generation, photo as reference)
+
+```
+Simplified bold stencil of THIS exact [subject] from the reference photo: same
+[pose / view] and framing, tightly cropped to [region, e.g. head and shoulders],
+no background. Bold clean graphic made of large solid black shapes and pure
+white negative space, smooth contours, few internal lines. Keep what makes it
+this [subject]: [defining features, e.g. ear shape, eye, nose, markings, props],
+[fur / hair / feathers] shown as a handful of bold locks. Pure black on pure
+white only, no grey, no gradients, no speckles, no text, crisp edges, high
+resolution, looks like finished vector stencil artwork.
+```
+
+### Option B, pass 1: faithful engraving (photo as reference)
+
+```
+Faithful black-and-white woodcut / engraved-illustration interpretation of THIS
+exact [subject] from the reference photo, same [pose / view] and framing,
+tightly cropped to [region], background removed to plain white. Name and keep:
+[defining features and anything physically on the subject, e.g. collar, bridle].
+Render form with directional hatching that follows the [fur / muscle / feather]
+flow, dense blacks in shadows, open white on lit planes. Pure black on pure
+white only, no grey, no gradients, no text, crisp edges, high resolution.
+```
+
+### Option B, pass 2: moderate firming (pass 1 + photo as references)
+
+```
+Moderate refinement of the engraved [subject] (first reference) using the photo
+(second reference) for fidelity. Keep the exact same pose, framing, anatomy and
+most of the hatching, but turn all grey or stippled tones into clean black
+strokes, make every stroke slightly thicker, deepen the darkest shadows
+([where, e.g. under the jaw, inner ear]) into some solid black, and add a clear
+contour line on the outer edge. Not a full bold linocut: it should sit between a
+fine engraving and a bold linocut. Pure black on pure white only, no grey, no
+gradients, no speckles, no text, plain white background, crisp edges, high
+resolution.
+```
+
+Tips: for scenes (buildings, landscapes) ask for "a few bold horizontal engraved cloud lines with plenty of white" instead of a fully hatched sky. If pass 2 barely changes pass 1, run it again with stronger wording ("noticeably thicker strokes, merge shadows into solid black masses").
+
+## Importing into CAM
+
+- **Vectric (VCarve / Aspire):** import the SVG at 1:1 in mm, select all, V-Carve toolpath with your V-bit; tick flat depth and add the end mill as clearance tool for wide areas.
+- **Carbide Create:** import the SVG, check the size, Advanced V-carve with the end mill as the pocket tool.
+- **Easel:** import the SVG and check the width (it can mis-scale). Easel has no true V-carve, so fill-cut/pocket with an end mill, or use other CAM for V-carving.
+- **Fusion 360:** insert the SVG onto a sketch, verify scale, then use an Engrave (V-bit) or 2D Pocket toolpath.
+
+If the script notes say *"flat areas wider than 3.5 mm hit max depth"*, that is the 60° bit bottoming out at 3 mm: use flat-depth V-carving with a clearance end mill.
+
+## Reference: the tracing script (used by the agent)
+
+The agent runs these; they are documented here for agents, and for anyone curious.
+
+### Install
 
 Python 3.9+.
 
@@ -47,7 +137,7 @@ pip install -r requirements.txt
 
 Dependencies: numpy, scipy, opencv-python-headless, scikit-image, potracer (pure-Python potrace), cairosvg (previews; needs the Cairo library, which macOS gets via `brew install cairo` and Debian/Ubuntu via `apt install libcairo2`).
 
-## Tracing: `scripts/cnc_vector.py`
+### Usage
 
 ```bash
 # Generated B/W artwork (option A or B) -> V-carve SVG, 300 mm wide, with job estimate
@@ -111,79 +201,10 @@ Run `python3 scripts/cnc_vector.py --help` for the full list.
 | Trace settings, generated art | `--threshold 128 --smooth 0.8 --min-feature 0.5` (0.8 for option A or a 90° bit) |
 | Trace settings, photo | `--threshold auto --smooth 2`, plus `--crop`/`--isolate` as needed |
 
-## Importing into CAM
-
-- **Vectric (VCarve / Aspire):** import the SVG at 1:1 in mm, select all, V-Carve toolpath with your V-bit; tick flat depth and add the end mill as clearance tool for wide areas.
-- **Carbide Create:** import the SVG, check the size, Advanced V-carve with the end mill as the pocket tool.
-- **Easel:** import the SVG and check the width (it can mis-scale). Easel has no true V-carve, so fill-cut/pocket with an end mill, or use other CAM for V-carving.
-- **Fusion 360:** insert the SVG onto a sketch, verify scale, then use an Engrave (V-bit) or 2D Pocket toolpath.
-
-If the script notes say *"flat areas wider than 3.5 mm hit max depth"*, that is the 60° bit bottoming out at 3 mm: use flat-depth V-carving with a clearance end mill.
-
-## Using it as an AI-assistant skill
-
-The `skills/` folder holds three plain-Markdown skills with YAML front matter (`name`, `description`):
-
-| Skill | Does |
-|---|---|
-| `skills/photo-to-cnc-svg/SKILL.md` | The end-to-end flow above (start here) |
-| `skills/cnc-graphic-artwork-generator/SKILL.md` | Stage 1: photo → B/W artwork, prompt rules and QC |
-| `skills/image-to-cnc-cut-svg/SKILL.md` | Stage 2: artwork → SVG, settings, preview, CAM notes |
-
-- **Grok Bot and similar agents with a skills folder:** drop the three folders into the agent's skills directory and put this repo (or at least `scripts/` and `requirements.txt`) on the machine the agent runs code on. The skills refer to `scripts/cnc_vector.py` relative to the repo root.
-- **Claude (Agent Skills / Claude Code):** copy each folder into `.claude/skills/` (project) or `~/.claude/skills/` (personal), and keep the repo checked out alongside.
-- **ChatGPT / custom GPTs and other chat assistants:** paste `skills/photo-to-cnc-svg/SKILL.md` (and the stage 1 skill) into the instructions, and attach `cnc_vector.py` + `preview.py` as files for the code tool. The image-generation steps need a model that accepts a reference image.
-
-The agent needs: an image-generation tool that takes a reference image, and somewhere to run Python.
-
-## Image-generation prompt templates
-
-Replace the `[...]` parts. Always attach the source photo as a reference image. Naming the subject's defining features is what keeps it from drifting into generic clip art.
-
-### Option A: simplified bold stencil (one generation, photo as reference)
-
-```
-Simplified bold stencil of THIS exact [subject] from the reference photo: same
-[pose / view] and framing, tightly cropped to [region, e.g. head and shoulders],
-no background. Bold clean graphic made of large solid black shapes and pure
-white negative space, smooth contours, few internal lines. Keep what makes it
-this [subject]: [defining features, e.g. ear shape, eye, nose, markings, props],
-[fur / hair / feathers] shown as a handful of bold locks. Pure black on pure
-white only, no grey, no gradients, no speckles, no text, crisp edges, high
-resolution, looks like finished vector stencil artwork.
-```
-
-### Option B, pass 1: faithful engraving (photo as reference)
-
-```
-Faithful black-and-white woodcut / engraved-illustration interpretation of THIS
-exact [subject] from the reference photo, same [pose / view] and framing,
-tightly cropped to [region], background removed to plain white. Name and keep:
-[defining features and anything physically on the subject, e.g. collar, bridle].
-Render form with directional hatching that follows the [fur / muscle / feather]
-flow, dense blacks in shadows, open white on lit planes. Pure black on pure
-white only, no grey, no gradients, no text, crisp edges, high resolution.
-```
-
-### Option B, pass 2: moderate firming (pass 1 + photo as references)
-
-```
-Moderate refinement of the engraved [subject] (first reference) using the photo
-(second reference) for fidelity. Keep the exact same pose, framing, anatomy and
-most of the hatching, but turn all grey or stippled tones into clean black
-strokes, make every stroke slightly thicker, deepen the darkest shadows
-([where, e.g. under the jaw, inner ear]) into some solid black, and add a clear
-contour line on the outer edge. Not a full bold linocut: it should sit between a
-fine engraving and a bold linocut. Pure black on pure white only, no grey, no
-gradients, no speckles, no text, plain white background, crisp edges, high
-resolution.
-```
-
-Tips: for scenes (buildings, landscapes) ask for "a few bold horizontal engraved cloud lines with plenty of white" instead of a fully hatched sky. If pass 2 barely changes pass 1, run it again with stronger wording ("noticeably thicker strokes, merge shadows into solid black masses").
-
 ## Repo layout
 
 ```
+AGENTS.md                 short agent entry point (mirrors "For agents")
 scripts/cnc_vector.py     tracer (vcarve / pocket / engrave / profile) + job estimate
 scripts/preview.py        even-odd merged preview PNG
 skills/                   the three assistant skills
