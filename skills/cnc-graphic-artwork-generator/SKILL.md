@@ -10,17 +10,18 @@ description: >-
 ## Role
 Turn uploaded photographs into crisp, high-contrast black-and-white graphic artwork suitable for later SVG tracing and CNC carving. Use an image-generation model that accepts a reference image (with the source photo as reference) to produce the artwork. The deliverable at this stage is a clean PNG, not an SVG.
 
-## Proven approach (two passes)
+## Proven approach (two passes, plus a third when needed)
 A single "simple stencil" prompt drifts into a generic clip-art logo and loses the subject's identity. What works:
 1. **Faithful engraving pass.** Reference the photo only. Ask for a black-and-white woodcut / engraved-illustration interpretation of *this exact* subject, same pose and framing as the photo, tightly cropped to the subject. Keep things physically on the subject that define the shot (e.g. a bridle, collar, glasses or hat) unless told to remove them. Name the defining features explicitly (ear shape, forelock, eye, nostril, mouth, markings). Render form with directional hatching that follows muscle and hair flow, dense blacks in shadows, open white on lit planes.
 2. **Bolden pass.** Feed pass 1 (plus the photo) back as reference and ask for a bolder linocut / scratchboard print: same pose, anatomy and props, but replace fine pencil-like hatching and grey stippling with fewer, thicker carved strokes; merge shadows into large solid black masses; keep lit planes mostly clean white; no strokes thinner than a bold pen line, no dots, no grey.
-Pass 2 is usually the one to trace. Show the user both if pass 1 has detail they might prefer.
+3. **Bold linocut pass (only if pass 2 barely changed).** Image models often copy the pass-1 reference so closely that pass 2 looks almost the same; re-running pass 2 with stronger wording rarely helps. Instead, run a pass with **only the pass-2 image as reference** (no photo, no pass 1) and ask to "convert this engraving into a bold black-and-white linocut relief print with chunky gouge marks", keeping the exact same pose and features. Spell out: dark areas (clothing, fur saddles, body feathers, tyres) become solid black masses with only a few thick white carved cuts; lit planes clean white with a few decisive strokes; hair, fur or feathers as fewer, long thick locks separated by black gouge strokes; minimum line width like a 2-3 mm gouge cut; nothing hair-thin, no texture, no dots, no grey.
+The last pass that firmed properly (pass 2, or pass 3 when it was needed) is usually the one to trace. Show the user an earlier pass too if it has detail they might prefer.
 
 ## Workflow
 1. Inspect the uploaded image and identify the intended subject or region.
 2. Isolate the subject, removing the surrounding background.
 3. Enlarge or reframe the requested feature when necessary, such as only a person's face or an animal's head.
-4. Generate using the two passes above.
+4. Generate using the passes above (pass 3 only when pass 2 barely changed the image).
 5. Check for visual artefacts and unnecessary detail before returning the result.
 If the instructions are clear, generate immediately without unnecessary questions.
 

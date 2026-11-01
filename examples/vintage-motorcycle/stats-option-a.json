@@ -1,0 +1,31 @@
+{
+ "mode": "vcarve",
+ "size_mm": [
+  300.0,
+  225.0
+ ],
+ "px_per_mm": 8.0,
+ "min_feature_mm": 0.8,
+ "tool_dia_mm": 3.175,
+ "paths": 105,
+ "nodes": 2384,
+ "rapid_travel_mm_est": 1574.8,
+ "layers": [
+  "vcarve"
+ ],
+ "estimate": {
+  "plunges": 11,
+  "cut_length_m": 18.54,
+  "rapid_travel_m": 1.57,
+  "pass_depth_mm": 3.0,
+  "time_min": 18.5,
+  "time_range_min": [
+   13.0,
+   24.1
+  ],
+  "assumes": "feed 1200.0 plunge 300.0 rapid 3000.0 mm/min, safe Z 5 mm, stepover 0.4",
+  "notes": [
+   "flat areas wider than 3.5 mm hit max depth: CAM will want a clearance end mill there"
+  ]
+ }
+}

@@ -18,9 +18,10 @@ Generate both, then show them side by side and ask which to trace (A, B, or twea
 
 **Option A: simplified stencil.** Bold, clean graphic: large solid black shapes and white negative space, smooth contours, few internal lines, hair/fur/feathers as a handful of bold locks. Fast to carve. Watch that it stays recognisably *this* subject (markings, ear shape, muzzle) and doesn't drift into generic clip art; name those features in the prompt.
 
-**Option B: mid-ground engraving.** Two generations:
+**Option B: mid-ground engraving.** Two generations, sometimes three:
 1. Faithful engraving pass from the photo only: woodcut / engraved-illustration interpretation of the exact subject, same pose and framing, tightly cropped, keeping defining items on the subject (e.g. a bridle, a collar) unless the brief says otherwise. Directional hatching following muscle and hair flow, dense blacks in shadows, open white on lit planes. Name defining features explicitly.
 2. Moderate refinement with pass 1 plus the photo as references: keep pose, anatomy, props and most hatching, but turn grey or stippled tones into clean black strokes, make strokes slightly thicker, deepen the darkest shadows into some solid black, add a clear contour on the outer edge. Not a full bold linocut: it should sit between a fine engraving and a bold linocut.
+3. Only if pass 2 barely changed pass 1 (common; the model copies the reference closely): run a pass with only the pass-2 image as reference asking to "convert to a bold linocut relief print" with chunky gouge marks, same pose and features: solid black masses with a few thick white cuts, fewer strokes, minimum line width like a 2-3 mm gouge cut, nothing hair-thin, no texture or dots. Use that as option B.
 
 Prompt rules for both: pure black on pure white only, no grey, gradients, speckles, text or background, crisp edges, high resolution. Full prompt templates are in the repo README.
 

@@ -6,7 +6,7 @@
 
 | Source photo | Option A: bold stencil | Option B: mid-ground engraving | Traced SVG (preview) |
 |---|---|---|---|
-| <img src="examples/red-fox/source.jpg" width="200"> | <img src="examples/red-fox/option-a.jpg" width="200"> | <img src="examples/red-fox/option-b.jpg" width="200"> | <img src="examples/red-fox/preview.png" width="200"> |
+| <img src="examples/old-fisherman/source.jpg" width="200"> | <img src="examples/old-fisherman/option-a.jpg" width="200"> | <img src="examples/old-fisherman/option-b.jpg" width="200"> | <img src="examples/old-fisherman/preview.png" width="200"> |
 
 ## For agents: start here
 
@@ -20,7 +20,7 @@
 
 **Flow:**
 1. Take the user's photo and short direction (subject/region, what to keep or drop). If the subject is obvious, don't ask questions.
-2. Generate **option A** (simplified bold stencil, one pass) and **option B** (mid-ground engraving: an engraving pass, then a moderate firming pass using pass 1 as reference). Prompt templates are [below](#image-generation-prompt-templates).
+2. Generate **option A** (simplified bold stencil, one pass) and **option B** (mid-ground engraving: an engraving pass, then a moderate firming pass using pass 1 as reference; if that barely changes anything, a third "bold linocut" pass using only the pass-2 image as reference). Prompt templates are [below](#image-generation-prompt-templates).
 3. Show A and B side by side; let the user pick one or ask for a tweak.
 4. Trace the pick: `python3 scripts/cnc_vector.py art.png -o <subject>_vcarve_300mm.svg --mode vcarve --width-mm 300 --vbit-angle 60 --depth 3 --threshold 128 --smooth 0.8 --min-feature 0.5 > stats.json` (defaults unless the user gives specs; `--min-feature 0.8` for option A).
 5. Render `python3 scripts/preview.py <svg> preview.png`, look at it, and re-trace with a higher/lower `--min-feature` if it is speckled or has lost detail (1 to 3 tries).
@@ -32,24 +32,31 @@
 1. **Photo + short direction.** e.g. "the fox's head and ruff, lose the grass".
 2. **Two artwork options** are generated from the photo:
    - **A, simplified bold stencil:** big solid black shapes, white negative space, smooth contours, few internal lines. Quick to carve, reads from across a room.
-   - **B, mid-ground engraving:** made in two passes: a faithful **engraving pass** (woodcut-style hatching that follows the form), then a **moderate firming pass** that thickens strokes, removes grey/stipple and deepens the darkest shadows into solid black. It sits between a fine engraving and a bold linocut: lots of character, still traceable.
+   - **B, mid-ground engraving:** made in two passes: a faithful **engraving pass** (woodcut-style hatching that follows the form), then a **moderate firming pass** that thickens strokes, removes grey/stipple and deepens the darkest shadows into solid black. Image models often copy pass 1 too faithfully, so if pass 2 looks almost unchanged, a **third pass** (pass 2 as the only reference, "convert to a bold linocut relief print") does the firming. It sits between a fine engraving and a bold linocut: lots of character, still traceable.
 3. **Pick one** (or ask for a tweak).
 4. **Trace to SVG** with `cnc_vector.py` (defaults below unless you give specs).
 5. **Deliver** the SVG, an even-odd preview PNG of exactly what gets carved, and short carve notes: size, path count, time estimate, whether wide areas need a clearance end mill, and how to import it.
 
 ## Example gallery
 
-All examples are original: the "photos" are generated stand-ins, then run through the real flow at the default settings.
+All examples are original: the "photos" are generated stand-ins, then run through the real flow at the default settings. Every subject has option A and B traced so you can compare them; B (the engraving) is the house style.
+
+![Contact sheet: source, option A, option B and carve preview for six subjects](docs/contact-sheet.png)
 
 | Subject | Source | Option A | Option B | Traced | SVG | Paths | Est. time* |
 |---|---|---|---|---|---|---|---|
+| Old fisherman | <img src="examples/old-fisherman/source.jpg" width="120"> | <img src="examples/old-fisherman/option-a.jpg" width="120"> | <img src="examples/old-fisherman/option-b.jpg" width="120"> | B: <img src="examples/old-fisherman/preview.png" width="120"><br>A: <img src="examples/old-fisherman/preview-option-a.png" width="120"> | [B](examples/old-fisherman/old-fisherman_vcarve_300mm.svg) · [A](examples/old-fisherman/old-fisherman-stencil_vcarve_300mm.svg) | B 292 · A 112 | B ~39 min (27–51) · A ~33 min (23–42) |
+| Howling wolf | <img src="examples/howling-wolf/source.jpg" width="120"> | <img src="examples/howling-wolf/option-a.jpg" width="120"> | <img src="examples/howling-wolf/option-b.jpg" width="120"> | B: <img src="examples/howling-wolf/preview.png" width="120"><br>A: <img src="examples/howling-wolf/preview-option-a.png" width="120"> | [B](examples/howling-wolf/howling-wolf_vcarve_300mm.svg) · [A](examples/howling-wolf/howling-wolf-stencil_vcarve_300mm.svg) | B 101 · A 12 | B ~19 min (14–25) · A ~12 min (9–16) |
+| Red deer stag | <img src="examples/red-deer-stag/source.jpg" width="120"> | <img src="examples/red-deer-stag/option-a.jpg" width="120"> | <img src="examples/red-deer-stag/option-b.jpg" width="120"> | B: <img src="examples/red-deer-stag/preview.png" width="120"><br>A: <img src="examples/red-deer-stag/preview-option-a.png" width="120"> | [B](examples/red-deer-stag/red-deer-stag_vcarve_300mm.svg) · [A](examples/red-deer-stag/red-deer-stag-stencil_vcarve_300mm.svg) | B 265 · A 7 | B ~11 min (7–14) · A ~13 min (9–16) |
+| Tall ship | <img src="examples/tall-ship/source.jpg" width="120"> | <img src="examples/tall-ship/option-a.jpg" width="120"> | <img src="examples/tall-ship/option-b.jpg" width="120"> | B: <img src="examples/tall-ship/preview.png" width="120"><br>A: <img src="examples/tall-ship/preview-option-a.png" width="120"> | [B](examples/tall-ship/tall-ship_vcarve_300mm.svg) · [A](examples/tall-ship/tall-ship-stencil_vcarve_300mm.svg) | B 408 · A 144 | B ~17 min (12–22) · A ~25 min (17–32) |
+| Bald eagle | <img src="examples/bald-eagle/source.jpg" width="120"> | <img src="examples/bald-eagle/option-a.jpg" width="120"> | <img src="examples/bald-eagle/option-b.jpg" width="120"> | B: <img src="examples/bald-eagle/preview.png" width="120"><br>A: <img src="examples/bald-eagle/preview-option-a.png" width="120"> | [B](examples/bald-eagle/bald-eagle_vcarve_300mm.svg) · [A](examples/bald-eagle/bald-eagle-stencil_vcarve_300mm.svg) | B 253 · A 18 | B ~26 min (18–34) · A ~24 min (17–32) |
+| Vintage motorcycle (300×225 mm) | <img src="examples/vintage-motorcycle/source.jpg" width="120"> | <img src="examples/vintage-motorcycle/option-a.jpg" width="120"> | <img src="examples/vintage-motorcycle/option-b.jpg" width="120"> | B: <img src="examples/vintage-motorcycle/preview.png" width="120"><br>A: <img src="examples/vintage-motorcycle/preview-option-a.png" width="120"> | [B](examples/vintage-motorcycle/vintage-motorcycle_vcarve_300mm.svg) · [A](examples/vintage-motorcycle/vintage-motorcycle-stencil_vcarve_300mm.svg) | B 354 · A 105 | B ~7 min (5–10) · A ~18 min (13–24) |
 | Red fox | <img src="examples/red-fox/source.jpg" width="120"> | <img src="examples/red-fox/option-a.jpg" width="120"> | <img src="examples/red-fox/option-b.jpg" width="120"> | B: <img src="examples/red-fox/preview.png" width="120"><br>A: <img src="examples/red-fox/preview-option-a.png" width="120"> | [B](examples/red-fox/red-fox_vcarve_300mm.svg) · [A](examples/red-fox/red-fox-stencil_vcarve_300mm.svg) | B 1099 · A 20 | B ~35 min (25–45) · A ~18 min (13–24) |
-| Barn owl | <img src="examples/barn-owl/source.jpg" width="120"> | <img src="examples/barn-owl/option-a.jpg" width="120"> | <img src="examples/barn-owl/option-b.jpg" width="120"> | A: <img src="examples/barn-owl/preview.png" width="120"> | [A](examples/barn-owl/barn-owl_vcarve_300mm.svg) | 27 | ~13 min (9–16) |
 | Lighthouse | <img src="examples/lighthouse/source.jpg" width="120"> | <img src="examples/lighthouse/option-a.jpg" width="120"> | <img src="examples/lighthouse/option-b.jpg" width="120"> | A: <img src="examples/lighthouse/preview.png" width="120"> | [A](examples/lighthouse/lighthouse_vcarve_300mm.svg) | 87 | ~32 min (22–41) |
 
 \* V-carve, 300 mm wide, 60° V-bit, 3 mm max depth, feeds 1200/300/3000 mm/min. Rough estimate from the script; your CAM simulation is authoritative. Each folder also has the script's `stats.json`.
 
-Why some were traced as A: the owl's and lighthouse's option B kept a lot of fine stipple and sky hatching, which is beautiful on paper but slow and fragile in wood. Very fine engravings are better carved large (450 mm+) or as option A. The fox's B has stroke-shaped hatching that traces cleanly.
+Notes: the old fisherman, bald eagle, tall ship and vintage motorcycle needed the third (bold linocut) pass; the stag and wolf firmed up at pass 2. The tall ship's thin rigging lines will carve shallow at 300 mm, so it suits 450 mm+ or a 30° bit. The lighthouse was traced as A only: its B kept fine stipple and sky hatching, which is beautiful on paper but slow and fragile in wood.
 
 ## Installing the skills in your agent
 
@@ -110,7 +117,20 @@ gradients, no speckles, no text, plain white background, crisp edges, high
 resolution.
 ```
 
-Tips: for scenes (buildings, landscapes) ask for "a few bold horizontal engraved cloud lines with plenty of white" instead of a fully hatched sky. If pass 2 barely changes pass 1, run it again with stronger wording ("noticeably thicker strokes, merge shadows into solid black masses").
+### Option B, pass 3 (only if pass 2 barely changed): bold linocut (pass 2 as the ONLY reference)
+
+```
+Convert this engraving of [subject] into a bold black-and-white linocut relief
+print with chunky gouge marks, keeping the exact same [pose / face / features].
+[Dark areas, e.g. cap, sweater, body feathers, tyres] become solid black masses
+with only a few thick white carved cuts. Lit planes stay clean white with a few
+decisive strokes. [Hair / fur / beard / feathers] as fewer, long thick locks
+separated by black gouge strokes, no fine wiry hairs. Minimum line width like a
+2-3 mm gouge cut; nothing hair-thin, no texture, no dots. Pure black and pure
+white, no grey, white background, crisp edges, high resolution.
+```
+
+Tips: for scenes (buildings, landscapes) ask for "a few bold horizontal engraved cloud lines with plenty of white" instead of a fully hatched sky. If pass 2 barely changes pass 1 (common: the model copies the first reference closely), don't keep re-running it; use pass 3 below.
 
 ## Importing into CAM
 
@@ -209,7 +229,10 @@ scripts/cnc_vector.py     tracer (vcarve / pocket / engrave / profile) + job est
 scripts/preview.py        even-odd merged preview PNG
 skills/                   the three assistant skills
 examples/<subject>/       source.jpg, option-a.jpg, option-b.jpg,
-                          <subject>_vcarve_300mm.svg, preview.png, stats.json
+                          <subject>_vcarve_300mm.svg (B), preview.png, stats.json,
+                          <subject>-stencil_vcarve_300mm.svg (A), preview-option-a.png,
+                          stats-option-a.json
+docs/contact-sheet.png    overview of the example subjects
 ```
 
 ## Licence
