@@ -4,13 +4,32 @@
 
 > **For humans:** you don't run this yourself. Point your AI agent at this repo (for example *"install the skill from github.com/SnazzyGaz/photo-to-cnc-svg"*), then just send it a photo plus a line of direction, like *"the fox's head, lose the grass"*. It shows you two artwork options, you pick one, and it hands back the SVG.
 
-| Source photo | Option A: bold stencil | Option B: mid-ground engraving | Traced SVG (preview) |
-|---|---|---|---|
-| <img src="examples/old-fisherman/source.jpg" width="200"> | <img src="examples/old-fisherman/option-a.jpg" width="200"> | <img src="examples/old-fisherman/option-b.jpg" width="200"> | <img src="examples/old-fisherman/preview.png" width="200"> |
+<table>
+<tr><th width="25%">Source</th><th width="25%">B/W art</th><th width="25%">Traced SVG (cut map)</th><th width="25%">Carved, in Carve Sim</th></tr>
+<tr>
+<td><img src="docs/pipeline/samurai-1-source.jpg" alt="Generated source: samurai helmet on a skull"></td>
+<td><img src="docs/pipeline/samurai-2-art.jpg" alt="White-on-black woodcut art"></td>
+<td><img src="docs/pipeline/samurai-3-cutmap.jpg" alt="Cut map, black is carved"></td>
+<td><img src="docs/pipeline/samurai-4-carvesim.jpg" alt="Walnut board with white epoxy fill"></td>
+</tr>
+<tr><td colspan="4"><sub><b>Samurai skull, inverted.</b> Drawn white on black and traced with <code>--invert</code>, so the light parts are cut. Filled with white epoxy in walnut it reads as a pale image on a dark board. 380 paths, about 16 min.</sub></td></tr>
+<tr>
+<td><img src="docs/pipeline/stag-1-source.jpg" alt="Generated source: red deer stag"></td>
+<td><img src="docs/pipeline/stag-2-art.jpg" alt="Black-on-white woodcut art"></td>
+<td><img src="docs/pipeline/stag-3-cutmap.jpg" alt="Cut map, black is carved"></td>
+<td><img src="docs/pipeline/stag-4-carvesim.jpg" alt="Ash board with walnut inlay"></td>
+</tr>
+<tr><td colspan="4"><sub><b>Regal stag, standard.</b> Black lines are cut. Shown in ash with a walnut inlay. 326 paths, about 11 min.</sub></td></tr>
+</table>
+
+<sub>V-carve, 300 mm, 60° V-bit, 3 mm deep. The source images are generated stand-ins.</sub>
 
 ## Works with Carve Sim
 
 The SVGs this skill makes can be previewed in [Carve Sim](https://github.com/SnazzyGaz/carve-sim), a free browser app that shows the carve in 3D in different woods and fills (epoxy, metallic or wood inlay), sanded flush or as poured. Drop the SVG in and it reads the size and carve type from the file. **[Open Carve Sim →](https://snazzygaz.github.io/carve-sim/)**
+
+<p align="center"><img src="docs/pipeline/samurai-carvesim-walnut-elm.jpg" width="640" alt="The samurai skull SVG in Carve Sim: black walnut with an elm inlay"></p>
+<p align="center"><sub>The samurai skull SVG in Carve Sim · black walnut · elm inlay, sanded flush</sub></p>
 
 ## For agents: start here
 
@@ -32,6 +51,10 @@ The SVGs this skill makes can be previewed in [Carve Sim](https://github.com/Sna
 **Return to the user:** the SVG file, the preview PNG, and a short note covering size (mm), mode, path count, the time estimate range from `stats.json` (rough; CAM simulation is authoritative), whether wide areas need a clearance end mill, and the one-line import tip for their CAM program ([CAM notes](#importing-into-cam)).
 
 ## The flow
+
+| Source photo | Option A: bold stencil | Option B: mid-ground engraving | Traced SVG (preview) |
+|---|---|---|---|
+| <img src="examples/old-fisherman/source.jpg" width="200"> | <img src="examples/old-fisherman/option-a.jpg" width="200"> | <img src="examples/old-fisherman/option-b.jpg" width="200"> | <img src="examples/old-fisherman/preview.png" width="200"> |
 
 1. **Photo + short direction.** e.g. "the fox's head and ruff, lose the grass".
 2. **Two artwork options** are generated from the photo:
