@@ -8,6 +8,10 @@
 |---|---|---|---|
 | <img src="examples/old-fisherman/source.jpg" width="200"> | <img src="examples/old-fisherman/option-a.jpg" width="200"> | <img src="examples/old-fisherman/option-b.jpg" width="200"> | <img src="examples/old-fisherman/preview.png" width="200"> |
 
+## Works with Carve Sim
+
+The SVGs this skill makes can be previewed in [Carve Sim](https://github.com/SnazzyGaz/carve-sim), a free browser app that shows the carve in 3D in different woods and fills (epoxy, metallic or wood inlay), sanded flush or as poured. Drop the SVG in and it reads the size and carve type from the file. **[Open Carve Sim →](https://snazzygaz.github.io/carve-sim/)**
+
 ## For agents: start here
 
 **Entry point:** [`skills/photo-to-cnc-svg/SKILL.md`](skills/photo-to-cnc-svg/SKILL.md). Load it, plus the two stage skills it references:
