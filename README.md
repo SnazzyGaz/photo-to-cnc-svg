@@ -264,4 +264,4 @@ docs/contact-sheet.png    overview of the example subjects
 
 ## Licence
 
-MIT © 2026 Garyck Arntzen. See [LICENSE](LICENSE).
+MIT © 2026 Garyck Arntzen ([@_mintydoge](https://x.com/_mintydoge)). See [LICENSE](LICENSE).
