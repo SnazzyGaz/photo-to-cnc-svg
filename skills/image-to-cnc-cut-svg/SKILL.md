@@ -40,7 +40,7 @@ Name `<subject>_<mode>_<width>mm.svg`; deliver SVG plus preview. Short summary:
 - wide areas needing a clearance end mill (from `notes`)
 - CAM notes:
   - Vectric: import 1:1 mm, select all, V-Carve toolpath; flat depth plus clearance tool for wide areas.
-  - Carbide Create: import SVG, check size, Advanced V-carve with end mill as pocket tool.
-  - Easel: import SVG, check width (can mis-scale), fill cut; no true V-carve, so pocket with end mill or use other CAM.
+  - Carbide Create: import SVG, check size, Advanced V-carve with end mill as pocket tool (free version does this, but only exports G-code for Carbide 3D machines; other machines need Pro).
+  - Easel: import SVG, check width (can mis-scale). V-carve needs Easel Pro; on the free plan, fill cut/pocket with an end mill or use other CAM.
   - Fusion 360: insert SVG on a sketch, verify scale, Engrave or 2D pocket toolpath.
 Keep the reply short.
