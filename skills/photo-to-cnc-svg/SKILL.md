@@ -26,12 +26,7 @@ Generate both, then show them side by side and ask which to trace (A, B, or twea
 Prompt rules for both: pure black on pure white only, no grey, gradients, speckles, text or background, crisp edges, high resolution. Full prompt templates are in the repo README.
 
 ## 3. Trace the chosen one
-- Unless the person gives specs, use defaults: V-carve, 300 mm wide, 60° V-bit, 3 mm depth, end mill 3.175 mm, feeds 1200/300/3000 mm/min. If they want to choose, ask width, style, bit and CAM program in one question.
-- `pip install -r requirements.txt`
-- Run, for generated B/W art:
-  `python3 scripts/cnc_vector.py art.png -o <subject>_vcarve_300mm.svg --mode vcarve --width-mm 300 --vbit-angle 60 --depth 3 --threshold 128 --smooth 0.8 --min-feature 0.5 > stats.json`
-  (Option A can take `--min-feature 0.8`; a 90° bit wants 0.8 to 1.0.)
-- Render the true-to-cut preview: `python3 scripts/preview.py <subject>_vcarve_300mm.svg preview.png`. Look at it next to the artwork; adjust `--min-feature` if speckled (raise) or detail is lost (lower). 1 to 3 tries.
+Follow `skills/image-to-cnc-cut-svg/SKILL.md` sections 2 and 3: its defaults (unless the person gives specs), the "clean B/W art" settings, the trace command and the preview check. Don't ask for specs unless the person wants to choose.
 
 ## 4. Deliver
-Send the SVG plus the preview image, with a short note: size, mode, path count, the time estimate range from `stats.json` (rough; CAM simulation is authoritative), whether wide areas need a clearance end mill, and the one-line import tip for their CAM program (from `image-to-cnc-cut-svg`).
+As in `image-to-cnc-cut-svg` section 4: the SVG, the preview and the short note with its CAM import tip.

@@ -46,7 +46,7 @@
    - **A, simplified bold stencil** (one generation): big solid black shapes, white negative space, smooth contours, few internal lines. Quick to carve, reads from across a room.
    - **B, mid-ground engraving** (two or three generations): a faithful **engraving pass** (woodcut-style hatching that follows the form), then a **moderate firming pass** that thickens strokes, removes grey and stipple and deepens the darkest shadows into solid black. Image models often copy pass 1 too closely; if pass 2 barely changes it, a **third pass** with only the pass-2 image as reference ("convert to a bold linocut relief print") does the firming. The fisherman above needed that third pass. B sits between a fine engraving and a bold linocut: lots of character, still traceable.
 3. **Pick one**, or ask for a tweak.
-4. **Trace to SVG** with `cnc_vector.py` at the [defaults](#defaults-used-by-the-skills) unless you give specs, then check the even-odd preview and re-trace with a higher or lower `--min-feature` if it's speckled or has lost detail (1 to 3 tries).
+4. **Trace to SVG** with `cnc_vector.py` at the [defaults](skills/image-to-cnc-cut-svg/SKILL.md#defaults) unless you give specs, then check the true-to-cut preview and re-trace with a higher or lower `--min-feature` if it's speckled or has lost detail (1 to 3 tries).
 5. **Deliver:** the SVG, the preview PNG of exactly what gets carved, and a short note: size, path count, time estimate, whether wide areas need a clearance end mill, and how to import it into your CAM program.
 
 ## For agents: start here
@@ -55,17 +55,9 @@
 [`skills/cnc-graphic-artwork-generator/SKILL.md`](skills/cnc-graphic-artwork-generator/SKILL.md) (photo → B/W artwork) and
 [`skills/image-to-cnc-cut-svg/SKILL.md`](skills/image-to-cnc-cut-svg/SKILL.md) (artwork → SVG). [`AGENTS.md`](AGENTS.md) has the same flow in short form.
 
-**You need:** an image-generation tool that accepts a reference image, and a shell with Python 3.9+, this repo checked out and `pip install -r requirements.txt`.
+**You need:** an image-generation tool that accepts a reference image, and a shell with Python 3.10+, this repo checked out and `pip install -r requirements.txt` (no system libraries).
 
-**Flow:** the five steps [above](#how-it-works). Prompts are in the [templates](#image-generation-prompt-templates). Trace and preview the pick with:
-
-```bash
-python3 scripts/cnc_vector.py art.png -o <subject>_vcarve_300mm.svg --mode vcarve --width-mm 300 \
-  --vbit-angle 60 --depth 3 --threshold 128 --smooth 0.8 --min-feature 0.5 > stats.json   # 0.8 for option A
-python3 scripts/preview.py <subject>_vcarve_300mm.svg preview.png
-```
-
-**Return to the user:** the SVG, the preview PNG, and a short note: size (mm), mode, path count, the time range from `stats.json` (rough; CAM simulation is authoritative), whether wide areas need a clearance end mill (`notes` in `stats.json`), and the one-line [CAM import tip](#importing-into-cam) for their program.
+**Flow:** the five steps [above](#how-it-works). Prompts are in the [templates](#image-generation-prompt-templates). Trace settings, commands, defaults, the delivery note and CAM import tips live in one place: [`skills/image-to-cnc-cut-svg/SKILL.md`](skills/image-to-cnc-cut-svg/SKILL.md).
 
 ## Example gallery
 
@@ -80,7 +72,7 @@ Every "photo" is a generated stand-in, run through the flow at the default setti
 | **Bald eagle** | <img src="examples/bald-eagle/source.jpg" width="110" alt="Bald eagle: source"> | <img src="examples/bald-eagle/option-a.jpg" width="110" alt="Bald eagle: option A"> | <img src="examples/bald-eagle/option-b.jpg" width="110" alt="Bald eagle: option B"> | <a href="examples/bald-eagle/bald-eagle-stencil_vcarve_300mm.svg"><img src="examples/bald-eagle/preview-option-a.png" width="110" alt="Bald eagle: traced A"></a> | <a href="examples/bald-eagle/bald-eagle_vcarve_300mm.svg"><img src="examples/bald-eagle/preview.png" width="110" alt="Bald eagle: traced B"></a> | A&nbsp;18<br>B&nbsp;253 | A&nbsp;~25&nbsp;(17–32)<br>B&nbsp;~26&nbsp;(18–34) |
 | **Vintage motorcycle**<br><sub>300×225 mm</sub> | <img src="examples/vintage-motorcycle/source.jpg" width="110" alt="Vintage motorcycle: source"> | <img src="examples/vintage-motorcycle/option-a.jpg" width="110" alt="Vintage motorcycle: option A"> | <img src="examples/vintage-motorcycle/option-b.jpg" width="110" alt="Vintage motorcycle: option B"> | <a href="examples/vintage-motorcycle/vintage-motorcycle-stencil_vcarve_300mm.svg"><img src="examples/vintage-motorcycle/preview-option-a.png" width="110" alt="Vintage motorcycle: traced A"></a> | <a href="examples/vintage-motorcycle/vintage-motorcycle_vcarve_300mm.svg"><img src="examples/vintage-motorcycle/preview.png" width="110" alt="Vintage motorcycle: traced B"></a> | A&nbsp;105<br>B&nbsp;354 | A&nbsp;~19&nbsp;(13–24)<br>B&nbsp;~7&nbsp;(5–10) |
 | **Red fox** | <img src="examples/red-fox/source.jpg" width="110" alt="Red fox: source"> | <img src="examples/red-fox/option-a.jpg" width="110" alt="Red fox: option A"> | <img src="examples/red-fox/option-b.jpg" width="110" alt="Red fox: option B"> | <a href="examples/red-fox/red-fox-stencil_vcarve_300mm.svg"><img src="examples/red-fox/preview-option-a.png" width="110" alt="Red fox: traced A"></a> | <a href="examples/red-fox/red-fox_vcarve_300mm.svg"><img src="examples/red-fox/preview.png" width="110" alt="Red fox: traced B"></a> | A&nbsp;20<br>B&nbsp;1099 | A&nbsp;~18&nbsp;(13–24)<br>B&nbsp;~35&nbsp;(25–45) |
-| **Lighthouse**<br><sub>300×400 mm</sub> | <img src="examples/lighthouse/source.jpg" width="110" alt="Lighthouse: source"> | <img src="examples/lighthouse/option-a.jpg" width="110" alt="Lighthouse: option A"> | <img src="examples/lighthouse/option-b.jpg" width="110" alt="Lighthouse: option B"> | <a href="examples/lighthouse/lighthouse_vcarve_300mm.svg"><img src="examples/lighthouse/preview.png" width="110" alt="Lighthouse: traced A"></a> | <sub>not traced</sub> | A&nbsp;87 | A&nbsp;~32&nbsp;(22–41) |
+| **Lighthouse**<br><sub>300×400 mm</sub> | <img src="examples/lighthouse/source.jpg" width="110" alt="Lighthouse: source"> | <img src="examples/lighthouse/option-a.jpg" width="110" alt="Lighthouse: option A"> | <img src="examples/lighthouse/option-b.jpg" width="110" alt="Lighthouse: option B"> | <a href="examples/lighthouse/lighthouse-stencil_vcarve_300mm.svg"><img src="examples/lighthouse/preview-option-a.png" width="110" alt="Lighthouse: traced A"></a> | <sub>not traced</sub> | A&nbsp;87 | A&nbsp;~32&nbsp;(22–41) |
 
 \* Minutes: estimate (range). V-carve, 300 mm wide (except where noted), 60° V-bit, 3 mm max depth, feeds 1200/300/3000 mm/min. Rough estimate from the script; your CAM simulation is authoritative. Each folder has the script's `stats.json` (B) and `stats-option-a.json` (A).
 
@@ -90,7 +82,7 @@ Notes:
 - **Time follows area, not path count.** Thin strokes are cut in one sweep along their centreline; shapes wider than the bit can span at 3 mm (about 3.5 mm with a 60° bit) are cleared at full depth. That's why A, with its big solid blacks, is sometimes the slower carve (stag, tall ship, motorcycle).
 - **Tall ship:** the thin rigging lines carve shallow at 300 mm; it suits 450 mm+ or a 30° bit.
 - **Red fox:** from the first batch, made before the third pass existed. Its B traces cleanly but at 1,099 paths it is by far the busiest file here.
-- **Lighthouse:** traced as A only (stored under the B filenames, `lighthouse_vcarve_300mm.svg` and `preview.png`). Its B kept fine stipple and sky hatching: fine on paper, slow and fragile in wood.
+- **Lighthouse:** traced as A only. Its B kept fine stipple and sky hatching: fine on paper, slow and fragile in wood.
 
 The six subjects made with the current flow on one page: [`docs/contact-sheet.png`](docs/contact-sheet.png).
 
@@ -176,12 +168,7 @@ white, no grey, white background, crisp edges, high resolution.
 
 ## Importing into CAM
 
-- **Vectric (VCarve / Aspire):** import the SVG at 1:1 in mm, select all, V-Carve toolpath with your V-bit; tick flat depth and add the end mill as clearance tool for wide areas.
-- **Carbide Create:** import the SVG, check the size, then Advanced V-carve with the end mill as the pocket tool. Advanced V-carve is in the free version, but free (Core) only exports G-code for Carbide 3D machines; other machines need Pro.
-- **Easel:** import the SVG and check the width (it can mis-scale). V-carving needs Easel Pro; on the free plan, fill-cut/pocket with an end mill or use other CAM for the V-carve.
-- **Fusion 360:** insert the SVG onto a sketch, verify scale, then use an Engrave (V-bit) or 2D Pocket toolpath.
-
-If `stats.json` notes say *"flat areas wider than 3.5 mm hit max depth"*, that's the 60° bit bottoming out at 3 mm: use flat-depth V-carving with a clearance end mill.
+The SVG is in millimetres and imports at 1:1. Per-program steps (Vectric, Carbide Create, Easel, Fusion 360) and what to do when `stats.json` says flat areas hit max depth are in [`image-to-cnc-cut-svg` section 4](skills/image-to-cnc-cut-svg/SKILL.md#4-deliver).
 
 ## Reference: the tracing script
 
@@ -189,7 +176,7 @@ The agent runs these; they're documented here for agents and for anyone running 
 
 ### Install
 
-Python 3.9+.
+Python 3.10+.
 
 ```bash
 git clone https://github.com/SnazzyGaz/photo-to-cnc-svg.git
@@ -197,11 +184,13 @@ cd photo-to-cnc-svg
 pip install -r requirements.txt
 ```
 
-Dependencies: numpy, scipy, opencv-python-headless, scikit-image, potracer (pure-Python potrace) and cairosvg (previews). cairosvg needs the Cairo library: `brew install cairo` on macOS, `apt install libcairo2` on Debian/Ubuntu; on Windows, install a GTK3 runtime or MSYS2's Cairo package and make sure its DLLs are on `PATH`.
+Dependencies: numpy, scipy, opencv-python-headless, scikit-image and potracer (pure-Python potrace). All pip wheels, no system libraries, so it works the same on Windows, macOS and Linux. `requirements.txt` gives compatible ranges; `requirements-lock.txt` pins the exact versions the examples were made with.
+
+Tests: `pip install pytest && pytest -q`. They re-run the fisherman below, every mode and the preview; GitHub Actions runs them on Linux and Windows.
 
 ### Usage
 
-This reproduces the old fisherman's option B exactly (292 paths, ~39 min), so it doubles as a check that the install works. `work/` is git-ignored.
+With `requirements-lock.txt` this reproduces the old fisherman's option B exactly (292 paths, ~39 min), so it doubles as a check that the install works. `work/` is git-ignored.
 
 ```bash
 mkdir -p work
@@ -211,7 +200,7 @@ python3 scripts/cnc_vector.py examples/old-fisherman/option-b.jpg -o work/old-fi
   --mode vcarve --width-mm 300 --vbit-angle 60 --depth 3 \
   --threshold 128 --smooth 0.8 --min-feature 0.5 > work/stats.json
 
-# True-to-cut preview (all paths merged, even-odd, so holes read correctly)
+# True-to-cut preview: black is carved, holes read correctly
 python3 scripts/preview.py work/old-fisherman_vcarve_300mm.svg work/preview.png --width 1600
 ```
 
@@ -250,34 +239,24 @@ The SVG is in millimetres (`width="300mm"` with a matching viewBox), so it impor
 | `--single` | | Profile: keep the largest outline only |
 | `--border` | `0` | Add a rectangular profile border, margin in mm |
 | `--alphamax` / `--opttol` | 1.1 / 0.4 | Potrace corner smoothness / curve simplification |
-| `--preview` | | Quick built-in PNG (fills paths separately, so holes look solid; use `preview.py`) |
+| `--preview out.png` | | Also write the true-to-cut preview (same renderer as `preview.py`) |
 
 `python3 scripts/cnc_vector.py --help` prints the same list.
 
-### Defaults used by the skills
-
-| Setting | Default |
-|---|---|
-| Style | V-carve |
-| Width | 300 mm |
-| V-bit | 60° |
-| Depth | 3 mm (pocket 6, engrave 1, profile = stock thickness) |
-| End mill (clearance / pocket) | 3.175 mm (1/8") |
-| Feeds | 1200 feed / 300 plunge / 3000 rapid mm/min |
-| Trace settings, generated art | `--threshold 128 --smooth 0.8 --min-feature 0.5` (0.8 for option A or a 90° bit) |
-| Trace settings, photo | `--threshold auto --smooth 2`, plus `--crop`/`--isolate` as needed |
+Defaults used by the skills (300 mm, 60° V-bit, 3 mm deep, feeds) and the trace settings for generated art vs photos: [`image-to-cnc-cut-svg`](skills/image-to-cnc-cut-svg/SKILL.md#defaults).
 
 ## Repo layout
 
 ```
 AGENTS.md                 short agent entry point
 scripts/cnc_vector.py     tracer (vcarve / pocket / engrave / profile) + job estimate
-scripts/preview.py        even-odd merged preview PNG
-skills/                   the three agent skills
+scripts/preview.py        true-to-cut preview PNG (OpenCV, no Cairo)
+skills/                   the three agent skills (image-to-cnc-cut-svg holds the settings)
+tests/                    pytest regression tests (CI: .github/workflows/test.yml)
 examples/<subject>/       source.jpg, option-a.jpg, option-b.jpg
                           B: <subject>_vcarve_300mm.svg, preview.png, stats.json
                           A: <subject>-stencil_vcarve_300mm.svg, preview-option-a.png, stats-option-a.json
-                          (lighthouse: A only, under the B filenames)
+                          (lighthouse: A only)
 docs/contact-sheet.png    the six current-flow subjects on one page
 docs/pipeline/            images for the samurai and stag strips and the Carve Sim shot
 ```

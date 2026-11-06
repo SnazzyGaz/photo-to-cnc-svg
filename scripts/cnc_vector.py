@@ -7,9 +7,9 @@ Modes:
   engrave  single-line centreline paths (open polylines -> smooth curves)
   profile  outer silhouette only, for cutting the shape free
 
-Deps: numpy scipy opencv-python-headless scikit-image potracer cairosvg
+Deps: numpy scipy opencv-python-headless scikit-image potracer
 """
-import argparse, json, math, sys
+import argparse, json, math, os, sys
 import numpy as np, cv2
 import potrace
 from skimage.morphology import skeletonize
@@ -34,8 +34,13 @@ def parse_crop(s, w, h):
     v = [float(x) for x in s.split(',')]
     if all(0 <= x <= 1 for x in v):  # fractions
         v = [v[0] * w, v[1] * h, v[2] * w, v[3] * h]
+    if len(v) != 4:
+        sys.exit(f"--crop needs 4 values x0,y0,x1,y1, got {s!r}")
     x0, y0, x1, y1 = [int(round(x)) for x in v]
-    return max(0, x0), max(0, y0), min(w, x1), min(h, y1)
+    x0, y0, x1, y1 = max(0, x0), max(0, y0), min(w, x1), min(h, y1)
+    if x1 - x0 < 2 or y1 - y0 < 2:
+        sys.exit(f"--crop {s!r} gives an empty box on a {w}x{h} image: x1 must be > x0 and y1 > y0")
+    return x0, y0, x1, y1
 
 # ---------------------------------------------------------------- image -> mask
 def load_and_prepare(a):
@@ -349,7 +354,7 @@ def main():
     p.add_argument('--lines', choices=['dark', 'edges'], default='dark', help='engrave source')
     p.add_argument('--single', action='store_true', help='profile: keep largest outline only')
     p.add_argument('--border', type=float, default=0, help='add rectangular profile border, margin mm')
-    p.add_argument('--preview', help='write PNG preview')
+    p.add_argument('--preview', help='also write a true-to-cut PNG preview (same as preview.py)')
     g = p.add_argument_group('job estimate (all optional; mm and mm/min)')
     g.add_argument('--depth', type=float, help='total cut depth (vcarve: max/flat depth)')
     g.add_argument('--pass-depth', type=float, help='depth per pass (default = tool dia/2, vcarve = depth)')
@@ -360,8 +365,13 @@ def main():
     a = p.parse_args()
     if a.min_feature is None:
         a.min_feature = {'vcarve': 0.6, 'pocket': a.tool_dia, 'engrave': 0.8, 'profile': a.tool_dia}[a.mode]
+    if a.isolate and not a.crop:
+        print("warning: --isolate needs --crop (the box to GrabCut inside); ignored", file=sys.stderr)
 
     img, iso = load_and_prepare(a)
+    if a.use_isolation_as_mask and iso is None:
+        print("warning: --use-isolation-as-mask needs --crop with --isolate, or an image with a transparent "
+              "background; falling back to the tone mask", file=sys.stderr)
     h0, w0 = img.shape[:2]
     W, H, ppm = working_scale(a, h0, w0)
     size = (int(round(W * ppm)), int(round(H * ppm)))
@@ -438,14 +448,10 @@ def main():
                   'layers': [l[0] for l in layers]})
     if a.depth:
         stats['estimate'] = estimate(a, geo, ppm, len(masks) if a.mode == 'pocket' else 1)
-    if a.preview:
-        import cairosvg
-        svg = "\n".join(out)
-        if a.mode != 'engrave':  # show cut regions solid, even-odd so holes read correctly
-            for k, shade in enumerate(['#bbb', '#888', '#555', '#222', '#000'][-len(layers):] if len(layers) > 1 else ['#000']):
-                svg = svg.replace('fill="none"', f'fill="{shade}" fill-rule="evenodd"', 1)
-        svg = svg.replace('stroke-width="0.1"', 'stroke-width="0.35"')
-        cairosvg.svg2png(bytestring=svg.encode(), write_to=a.preview, output_width=1200, background_color='white')
+    if a.preview:  # same true-to-cut renderer as preview.py
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from preview import render
+        render("\n".join(out), a.preview, 1600)
     print(json.dumps(stats, indent=1))
 
 if __name__ == '__main__':
