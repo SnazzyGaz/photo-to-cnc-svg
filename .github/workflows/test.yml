@@ -1,0 +1,21 @@
+name: test
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, python: '3.13', reqs: requirements-lock.txt, loose: '0'}
+          - {os: windows-latest, python: '3.13', reqs: requirements-lock.txt, loose: '0'}
+          - {os: ubuntu-latest, python: '3.10', reqs: requirements.txt, loose: '1'}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -r ${{ matrix.reqs }} pytest
+      - run: pytest -q
+        env:
+          LOOSE: ${{ matrix.loose }}
